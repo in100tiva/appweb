@@ -1,50 +1,59 @@
 <!DOCTYPE html>
 <html lang="pt">
-
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Estoque</title>
-    <link rel="stylesheet" href="styles.css">
-    <script type="text/javascript" src="./index.js" defer=""></script>
-    <link rel="stylesheet" href="./index.css">
-  </head>
-
-  <body>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
     <h1>Gestão de Estoque</h1>
     <form id="itemForm">
-      <input type="text" id="itemName" placeholder="Nome do Item" required="">
-      <input type="number" id="itemQuantity" placeholder="Quantidade" required="">
-      <button type="submit">Adicionar Item</button>
+        <input type="text" id="itemName" placeholder="Nome do Item" required>
+        <input type="number" id="itemQuantity" placeholder="Quantidade" required>
+        <input type="date" id="itemExpiryDate" placeholder="Data de Validade" required>
+        <button type="submit">Adicionar Item</button>
     </form>
+    <input type="text" id="searchBar" placeholder="Pesquisar itens..." onkeyup="searchItems()">
     <table id="stockTable">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Quantidade</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantidade</th>
+                <th>Validade</th>
+                <th>Última Alteração</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
     </table>
 
     <!-- Modal para edição -->
     <div id="editModal" class="modal">
-      <div class="modal-content">
-        <span class="close-button">×</span>
-        <h2>Editar Item</h2>
-        <form id="editForm">
-          <input type="text" id="editName" placeholder="Nome do Item" required="">
-          <input type="number" id="editQuantity" placeholder="Quantidade" required="">
-          <button type="submit">Salvar Alterações</button>
-        </form>
-      </div>
+        <div class="modal-content">
+            <span class="close-button" onclick="closeEditModal()">×</span>
+            <h2>Editar Item</h2>
+            <form id="editForm">
+                <input type="text" id="editName" placeholder="Nome do Item" required>
+                <input type="number" id="editQuantity" placeholder="Quantidade" required>
+                <input type="date" id="editExpiryDate" placeholder="Data de Validade" required>
+                <button type="submit">Salvar Alterações</button>
+            </form>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Modal para confirmação de exclusão -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeDeleteModal()">×</span>
+            <h2>Confirmar Exclusão</h2>
+            <p>Tem certeza que deseja excluir este item?</p>
+            <button id="confirmDeleteButton" class="button">Excluir</button>
+            <button class="button close-button" onclick="closeDeleteModal()">Cancelar</button>
+        </div>
+    </div>
 
-
-  </body>
-
+    <script src="js/script.js"></script>
+</body>
 </html>
