@@ -11,13 +11,14 @@ document.getElementById('itemForm').addEventListener('submit', function(e) {
     const itemQuantity = document.getElementById('itemQuantity').value.trim();
     const itemExpiryDate = formatDate(document.getElementById('itemExpiryDate').value);
     const lastModified = getFormattedDateTime();
+    const user = localStorage.getItem('username');
 
     if (itemName === '' || itemQuantity === '' || itemExpiryDate === '' || isNaN(itemQuantity) || itemQuantity <= 0) {
         alert('Por favor, insira um nome de item válido, uma quantidade positiva e uma data de validade.');
         return;
     }
 
-    addItem(itemName, itemQuantity, itemExpiryDate, lastModified);
+    addItem(itemName, itemQuantity, itemExpiryDate, lastModified, user);
     document.getElementById('itemName').value = '';
     document.getElementById('itemQuantity').value = '';
     document.getElementById('itemExpiryDate').value = '';
@@ -27,12 +28,12 @@ document.getElementById('itemForm').addEventListener('submit', function(e) {
 function loadItems() {
     const items = JSON.parse(localStorage.getItem('stockItems')) || [];
     items.forEach(item => {
-        addItem(item.name, item.quantity, item.expiryDate, item.lastModified);
+        addItem(item.name, item.quantity, item.expiryDate, item.lastModified, item.user);
     });
     sortTable();
 }
 
-function addItem(name, quantity, expiryDate, lastModified) {
+function addItem(name, quantity, expiryDate, lastModified, user) {
     const table = document.getElementById('stockTable').getElementsByTagName('tbody')[0];
     const newRow = table.insertRow();
     newRow.innerHTML = `
@@ -45,6 +46,7 @@ function addItem(name, quantity, expiryDate, lastModified) {
             <button class="button" onclick="openDeleteModal(this)">Deletar</button>
         </td>
     `;
+    logAudit('Adicionar', `${name} (${quantity})`, user, lastModified);
     sortTable();
 }
 
@@ -58,13 +60,22 @@ function editItem(btn) {
 
     document.getElementById('editForm').onsubmit = function(e) {
         e.preventDefault();
+        const user = localStorage.getItem('username');
+        const lastModified = getFormattedDateTime();
+        const oldName = row.cells[0].innerHTML;
+        const oldQuantity = row.cells[1].innerHTML;
+        const oldExpiryDate = row.cells[2].innerHTML;
+
         row.cells[0].innerHTML = document.getElementById('editName').value;
         row.cells[1].innerHTML = document.getElementById('editQuantity').value;
         row.cells[2].innerHTML = formatDate(document.getElementById('editExpiryDate').value);
-        row.cells[3].innerHTML = getFormattedDateTime();
+        row.cells[3].innerHTML = lastModified;
+
         modal.style.display = 'none';
         saveItems(); // Salva os itens após a edição
         sortTable();
+
+        logAudit('Editar', `De ${oldName} (${oldQuantity}, ${oldExpiryDate}) Para ${row.cells[0].innerHTML} (${row.cells[1].innerHTML}, ${row.cells[2].innerHTML})`, user, lastModified);
     }
 }
 
@@ -85,9 +96,16 @@ function closeDeleteModal() {
 }
 
 document.getElementById('confirmDeleteButton').onclick = function() {
+    const user = localStorage.getItem('username');
+    const lastModified = getFormattedDateTime();
+    const itemName = rowToDelete.cells[0].innerHTML;
+    const itemQuantity = rowToDelete.cells[1].innerHTML;
+
     rowToDelete.parentNode.removeChild(rowToDelete);
     closeDeleteModal();
     saveItems(); // Salva os itens após a exclusão
+
+    logAudit('Deletar', `${itemName} (${itemQuantity})`, user, lastModified);
 }
 
 function saveItems() {
@@ -98,7 +116,8 @@ function saveItems() {
         const quantity = row.cells[1].textContent;
         const expiryDate = row.cells[2].textContent;
         const lastModified = row.cells[3].textContent;
-        items.push({ name: name, quantity: quantity, expiryDate: expiryDate, lastModified: lastModified });
+        const user = localStorage.getItem('username');
+        items.push({ name: name, quantity: quantity, expiryDate: expiryDate, lastModified: lastModified, user: user });
     });
     localStorage.setItem('stockItems', JSON.stringify(items));
 }
@@ -141,4 +160,10 @@ function getFormattedDateTime() {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
+
+function logAudit(action, details, user, timestamp) {
+    const logs = JSON.parse(localStorage.getItem('auditLogs')) || [];
+    logs.push({ action, details, user, timestamp });
+    localStorage.setItem('auditLogs', JSON.stringify(logs));
 }

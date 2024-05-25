@@ -5,14 +5,14 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 
     const users = [
         { username: 'admin', password: 'password' },
-        { username: 'luan', password: '123456' },
-        { username: 'roberto', password: '654321' }
+        { username: 'luan', password: '123456' }
     ];
 
     const user = users.find(user => user.username === username && user.password === password);
 
     if (user) {
         localStorage.setItem('loggedIn', true);
+        localStorage.setItem('username', username);
         window.location.href = 'index.html';
     } else {
         alert('Nome de usuário ou senha incorretos');
